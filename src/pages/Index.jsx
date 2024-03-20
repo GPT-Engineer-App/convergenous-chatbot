@@ -1,12 +1,19 @@
-import React, { useState } from "react";
-import { Box, Heading, Input, Button, Text, VStack, HStack, Divider, Spacer, Avatar, useToast } from "@chakra-ui/react";
-import { FaRobot, FaUser } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { Box, Heading, Input, Button, Text, VStack, HStack, Divider, Spacer, Avatar, useToast, Switch } from "@chakra-ui/react";
+import { FaRobot, FaUser, FaVolumeUp } from "react-icons/fa";
 
 const Index = () => {
   const [username, setUsername] = useState("");
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
+  const [textToSpeechEnabled, setTextToSpeechEnabled] = useState(false);
+  const [speechSynthesis, setSpeechSynthesis] = useState(null);
   const toast = useToast();
+
+  useEffect(() => {
+    const synth = window.speechSynthesis;
+    setSpeechSynthesis(synth);
+  }, []);
 
   const handleSignUp = () => {
     if (username.trim() !== "") {
@@ -33,6 +40,11 @@ const Index = () => {
       };
       setMessages([...messages, userMessage, botMessage]);
       setInputMessage("");
+
+      if (textToSpeechEnabled) {
+        const utterance = new SpeechSynthesisUtterance(botMessage.text);
+        speechSynthesis.speak(utterance);
+      }
     }
   };
 
@@ -50,6 +62,10 @@ const Index = () => {
         </VStack>
       ) : (
         <>
+          <HStack justify="flex-end">
+            <Text>Enable Text-to-Speech</Text>
+            <Switch isChecked={textToSpeechEnabled} onChange={(e) => setTextToSpeechEnabled(e.target.checked)} />
+          </HStack>
           <VStack spacing={4} align="stretch">
             {messages.map((message) => (
               <HStack key={message.id} bg={message.sender === "user" ? "gray.100" : "blue.100"} padding={2} borderRadius="md" maxWidth="80%" alignSelf={message.sender === "user" ? "flex-end" : "flex-start"}>
